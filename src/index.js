@@ -112,3 +112,6 @@ export async function fixPageAction(payload) {
 
 // Score badge under each page title.
 export { bylineProps, bylineResolver } from './byline.js';
+
+// Space accessibility report and Jira issues.
+export { spaceResolver } from './space.js';

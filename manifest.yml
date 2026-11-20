@@ -138,6 +138,14 @@ modules:
       viewportSize: large
       dynamicProperties:
         function: bylinePropsFn
+  confluence:spacePage:
+    - key: clearpage-space-report
+      resource: space-ui
+      render: native
+      resolver:
+        function: spaceResolverFn
+      title: Accessibility report
+      route: accessibility-report
   function:
     - key: checkPage
       handler: index.checkPageAction
@@ -147,18 +155,30 @@ modules:
       handler: index.bylineProps
     - key: bylineResolverFn
       handler: index.bylineResolver
+    - key: spaceResolverFn
+      handler: index.spaceResolver
 resources:
   - key: byline-ui
     path: src/frontend/byline.jsx
+  - key: space-ui
+    path: src/frontend/space.jsx
 permissions:
   scopes:
     - read:page:confluence
     - read:blogpost:confluence
     - write:page:confluence
     - write:blogpost:confluence
+    - read:space:confluence
+    - read:jira-work
+    - write:jira-work
 app:
   runtime:
     name: nodejs24.x
     memoryMB: 256
     architecture: arm64
   id: ari:cloud:ecosystem::app/7edf5ee1-9ade-4fcd-a77a-1b961293c253
+  compatibility:
+    confluence:
+      required: true
+    jira:
+      required: false
