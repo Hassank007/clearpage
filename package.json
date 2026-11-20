@@ -1,0 +1,18 @@
+{
+  "name": "clearpage",
+  "version": "0.1.0",
+  "description": "Accessibility checks and fixes for Confluence pages, as a Rovo agent",
+  "main": "index.js",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "@forge/api": "^8.5.0",
+    "@forge/bridge": "^7.3.0",
+    "@forge/react": "^12.5.0",
+    "@forge/resolver": "^2.0.2",
+    "react": "^18.3.1"
+  },
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --test test/*.test.mjs"
+  }
+}

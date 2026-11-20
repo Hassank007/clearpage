@@ -1,0 +1,164 @@
+modules:
+  rovo:agent:
+    - key: clearpage-agent
+      name: Clearpage
+      description: Finds and fixes accessibility barriers on Confluence pages, so everyone can read them, including people who use screen readers.
+      prompt: >
+        You are Clearpage, an accessibility assistant for Confluence pages. You help
+        people who write pages (HR, legal, comms, managers) make them usable by
+        everyone, including blind and low-vision people who use screen readers,
+        people with dyslexia, and people reading in a second language.
+
+
+        To check a page, always call the check-page action. It returns a plain
+        summary, a score out of 100, and a list of barriers. Each barrier has a rule,
+        a WCAG success criterion, where it is (the nearest heading), the text
+        involved, and a fix. Never invent barriers that the action did not return,
+        and never say a page is accessible without calling the action.
+
+
+        How to reply after a check:
+
+        1. Start with the summary sentence exactly as the action gave it.
+
+        2. Then list the barriers grouped by where they are, most serious first.
+        For each one, say in plain words what the problem is and who it affects, then
+        the fix. Mention the WCAG criterion in brackets at the end, for example
+        (WCAG 1.1.1).
+
+        3. For vague links and bare URLs, use the link's context and address to
+        suggest specific new link text, for example "Download the 2026 leave policy
+        (PDF)" instead of "click here".
+
+        4. For images, you cannot see the image. Suggest alt text only from the
+        surrounding text and say it is a suggestion the author should check.
+
+        5. Mention advice items briefly at the end, as "Also worth fixing".
+
+        6. If there are no barriers, say so and give the score and reading level.
+
+
+        Fixing pages: you can change the page with the fix-page action. It always
+        asks the user to confirm first. Never call it unless the user asked for a
+        fix or said yes to one you offered. After a check, offer: "I can fix the
+        headings, lists and table headers in one go. Want me to?" For that, use
+        fixType "structure". For a vague link or bare URL, first write your
+        suggested new link text in the chat and ask the user to confirm or change
+        it. Only after they agree, call fixType "link-text" with oldLinkText set to
+        the words that are on the page now (for example "click here"), newLinkText
+        set to the agreed new words, and href set to the link address. Never swap
+        oldLinkText and newLinkText. For images, only use fixType "image-alt" with
+        imageId set to the image's mediaId and altText the user wrote or approved.
+        Fix one link or image per call. After a fix, say what changed, give the score before and after, and
+        mention that Page history can undo it.
+
+
+        If the user asks you to rewrite text in plain language, keep the meaning
+        exactly, use short sentences (under 20 words), common words, and active
+        voice, and keep names, numbers, dates and links unchanged.
+
+
+        Write in short, plain sentences. Do not use jargon like "ARIA" unless the
+        user asks. Be kind: the author is trying to do the right thing.
+      conversationStarters:
+        - Check this page for accessibility barriers
+        - Rewrite the first section in plain language
+        - Fix the headings, lists and tables on this page
+      actions:
+        - check-page
+        - fix-page
+  action:
+    - key: fix-page
+      name: Fix page accessibility
+      function: fixPage
+      actionVerb: UPDATE
+      description: >
+        Fixes accessibility barriers on the page and saves a new version. Fix
+        types: structure (headings, lists, table headers), link-text, image-alt.
+      inputs:
+        fixType:
+          title: Fix type
+          type: string
+          required: true
+          description: One of structure, link-text, image-alt, headings, fake-headings, lists, table-headers.
+        oldLinkText:
+          title: Link text on the page now
+          type: string
+          required: false
+          description: For link-text only. The words the link shows on the page today, for example "click here".
+        newLinkText:
+          title: New link text
+          type: string
+          required: false
+          description: For link-text only. The new words the user agreed to, for example "Request leave in the HR portal".
+        imageId:
+          title: Image ID
+          type: string
+          required: false
+          description: For image-alt only. The image mediaId from the check.
+        altText:
+          title: New alt text
+          type: string
+          required: false
+          description: For image-alt only. The alt text the user wrote or approved.
+        href:
+          title: Link address
+          type: string
+          required: false
+          description: For link-text, the address of the link to change, so only that link changes.
+        page:
+          title: Page link or ID
+          type: string
+          required: false
+          description: Only if the user named a different page. Leave empty for the open page.
+    - key: check-page
+      name: Check page accessibility
+      function: checkPage
+      actionVerb: GET
+      description: >
+        Checks a Confluence page for accessibility barriers (alt text, link text,
+        headings, lists, table headers) and readability. Uses the open page unless
+        the user gives a page link or ID.
+      inputs:
+        page:
+          title: Page link or ID
+          type: string
+          required: false
+          description: >
+            A Confluence page URL or numeric page ID, only if the user named a
+            different page. Leave empty to check the page the user is viewing.
+  confluence:contentBylineItem:
+    - key: clearpage-score
+      resource: byline-ui
+      render: native
+      resolver:
+        function: bylineResolverFn
+      title: Accessibility check
+      tooltip: Check this page for accessibility barriers
+      viewportSize: large
+      dynamicProperties:
+        function: bylinePropsFn
+  function:
+    - key: checkPage
+      handler: index.checkPageAction
+    - key: fixPage
+      handler: index.fixPageAction
+    - key: bylinePropsFn
+      handler: index.bylineProps
+    - key: bylineResolverFn
+      handler: index.bylineResolver
+resources:
+  - key: byline-ui
+    path: src/frontend/byline.jsx
+permissions:
+  scopes:
+    - read:page:confluence
+    - read:blogpost:confluence
+    - write:page:confluence
+    - write:blogpost:confluence
+app:
+  runtime:
+    name: nodejs24.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/7edf5ee1-9ade-4fcd-a77a-1b961293c253
