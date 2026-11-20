@@ -13,6 +13,7 @@
 import api, { route } from '@forge/api';
 import Resolver from '@forge/resolver';
 import { checkPage, summary } from './checks.js';
+import { SAMPLE_PAGES } from './samples.js';
 
 const MAX_PAGES = 100;
 const PAGE_LABEL = (id) => `clearpage-page-${id}`;
@@ -271,6 +272,28 @@ resolver.define('createIssues', async ({ payload, context }) => {
     }
   }
   return { created, errors };
+});
+
+// Adds the sample pages to this space (skips any that already exist), so people can try Clearpage.
+resolver.define('createSamples', async ({ context }) => {
+  const spaceId = context?.extension?.space?.id;
+  if (!spaceId) return { error: 'Open a space first.' };
+  const existing = new Set((await spacePages(spaceId)).map((p) => p.title));
+  const created = [];
+  for (const sample of SAMPLE_PAGES) {
+    if (existing.has(sample.title)) continue;
+    const res = await api.asUser().requestConfluence(route`/wiki/api/v2/pages`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        spaceId, status: 'current', title: sample.title,
+        body: { representation: 'atlas_doc_format', value: JSON.stringify(sample.doc) },
+      }),
+    });
+    if (!res.ok) return { error: `Could not create "${sample.title}" (${res.status}). You may not have permission to add pages here.` };
+    created.push(sample.title);
+  }
+  return { created };
 });
 
 export const spaceResolver = resolver.getDefinitions();

@@ -24,8 +24,7 @@ const App = () => {
   const [busy, setBusy] = useState(null); // page id being sent, or 'bulk'
   const [notice, setNotice] = useState(null);
 
-  useEffect(() => {
-    invoke('getSpaceReport')
+  const load = () => invoke('getSpaceReport')
       .then((r) => {
         if (r.error) setError(r.error);
         else {
@@ -35,7 +34,22 @@ const App = () => {
         }
       })
       .catch(() => setError('Clearpage could not build the report.'));
-  }, []);
+  useEffect(() => { load(); }, []);
+
+  const addSamples = async () => {
+    setBusy('samples');
+    setNotice(null);
+    try {
+      const r = await invoke('createSamples');
+      if (r.error) setNotice({ appearance: 'error', text: r.error });
+      else {
+        setNotice({ appearance: 'success', text: r.created.length ? `Added ${r.created.join(' and ')}. Open one and click the Accessibility badge under the title.` : 'The sample pages are already in this space.' });
+        await load();
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const send = async (pageIds, who) => {
     if (!project) return;
@@ -133,6 +147,12 @@ const App = () => {
         ) : (
           <SectionMessage appearance="information"><Text>Install Clearpage in Jira on this site to send pages to Jira as issues.</Text></SectionMessage>
         )}
+      </Box>
+
+      <Box>
+        <Button appearance="subtle" onClick={addSamples} isDisabled={busy !== null}>
+          {busy === 'samples' ? 'Adding sample pages…' : 'Add 2 sample pages to try Clearpage'}
+        </Button>
       </Box>
 
       <DynamicTable caption="Pages in this space, lowest score first" head={head} rows={rows} rowsPerPage={20} />

@@ -105,3 +105,12 @@ test('reading ease: simple text scores higher than dense text', () => {
   assert.ok(readingEase(hard) < 30, `hard was ${readingEase(hard)}`);
   assert.equal(readingEase('Too short.'), null);
 });
+
+test('the sample pages show the barriers the walkthrough promises', async () => {
+  const { SAMPLE_PAGES } = await import('../src/samples.js');
+  const [guide, faq] = SAMPLE_PAGES.map((s) => checkPage(s.doc));
+  assert.deepEqual(rules(guide).sort(), ['bare-url', 'fake-heading', 'fake-list', 'heading-skip', 'table-no-header', 'vague-link', 'vague-link']);
+  assert.equal(guide.score, 38);
+  assert.deepEqual(rules(faq).sort(), ['fake-heading', 'fake-list', 'heading-skip', 'table-no-header', 'vague-link']);
+  assert.equal(faq.score, 58);
+});
