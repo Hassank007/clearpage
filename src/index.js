@@ -9,6 +9,7 @@
 import { fetchPage, savePage } from './pages.js';
 import { checkPage, summary } from './checks.js';
 import { applyFix } from './fixes.js';
+import { buildReport, issueForPage, spaceIdForKey } from './space.js';
 
 // How many findings to hand back to Rovo, so the reply stays readable.
 const MAX_BARRIERS = 25;
@@ -115,3 +116,33 @@ export { bylineProps, bylineResolver } from './byline.js';
 
 // Space accessibility report and Jira issues.
 export { spaceResolver } from './space.js';
+
+/**
+ * Action / MCP tool: check-space.
+ * Scores every page in a space and returns the totals and the pages that need the most work.
+ */
+export async function checkSpaceAction(payload) {
+  const key = String(payload?.spaceKey ?? '').trim() || payload?.context?.confluence?.spaceKey;
+  if (!key) return JSON.stringify({ error: 'Which space? Give me a space key, for example HR.' });
+  const spaceId = await spaceIdForKey(key);
+  if (!spaceId) return JSON.stringify({ error: `I could not find a space with the key ${key}, or you cannot see it.` });
+  const report = await buildReport(spaceId);
+  return JSON.stringify({
+    space: key,
+    totals: report.totals,
+    worstPages: report.pages.filter((p) => p.barrierCount > 0).slice(0, 10)
+      .map(({ id, title, url, score, barrierCount, problems, issue }) => ({ id, title, url, score, barrierCount, problems, jiraIssue: issue?.key ?? null })),
+  });
+}
+
+/**
+ * Action / MCP tool: create-accessibility-issue.
+ * Creates a Jira issue for a page's barriers, assigned to the page owner. Never duplicates.
+ */
+export async function createIssueAction(payload) {
+  const target = resolveTarget(payload);
+  const projectKey = String(payload?.projectKey ?? '').trim().toUpperCase();
+  if (!target || target.kind !== 'pages') return JSON.stringify({ error: 'Give me a Confluence page link or ID.' });
+  if (!projectKey) return JSON.stringify({ error: 'Which Jira project should the issue go in? Give me the project key, for example HR.' });
+  return JSON.stringify(await issueForPage(projectKey, target.id));
+}

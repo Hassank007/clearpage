@@ -211,6 +211,33 @@ async function createIssue(projectKey, page, result) {
   return { key: issue.key, status: 'To Do' };
 }
 
+/** Finds a space's ID from its key (for example "HR"), as the current user. */
+export async function spaceIdForKey(key) {
+  const res = await api.asUser().requestConfluence(route`/wiki/api/v2/spaces?keys=${key}`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) return null;
+  return (await res.json()).results?.[0]?.id ?? null;
+}
+
+/**
+ * Creates (or finds) the Jira issue for one page. Used by the Rovo agent and MCP tools.
+ * Returns { key, existing } or { error }.
+ */
+export async function issueForPage(projectKey, pageId) {
+  const issues = await existingIssues();
+  if (issues[pageId]) return { key: issues[pageId].key, existing: true };
+  const res = await api.asUser().requestConfluence(route`/wiki/api/v2/pages/${pageId}?body-format=atlas_doc_format`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) return { error: 'I could not open that page. It may not exist, or you may not have permission to see it.' };
+  const raw = await res.json();
+  const row = checkOne({ ...raw, base: raw._links?.base ?? '' });
+  if (row.barrierCount === 0) return { error: 'This page has no accessibility barriers, so no issue is needed.' };
+  try {
+    const created = await createIssue(projectKey, row, row.result);
+    return { key: created.key, existing: false, barriers: row.barrierCount };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 const resolver = new Resolver();
 
 resolver.define('getSpaceReport', async ({ context }) => {

@@ -53,6 +53,13 @@ modules:
         mention that Page history can undo it.
 
 
+        Spaces and Jira: to find which pages in a space need work, call
+        check-space and list the worst pages with their scores and main
+        problems. To hand a page to its owner, offer to create a Jira issue and
+        ask which project; then call create-accessibility-issue with the page ID
+        and project key. Say the issue key when it is done.
+
+
         If the user asks you to rewrite text in plain language, keep the meaning
         exactly, use short sentences (under 20 words), common words, and active
         voice, and keep names, numbers, dates and links unchanged.
@@ -67,7 +74,48 @@ modules:
       actions:
         - check-page
         - fix-page
+        - check-space
+        - create-accessibility-issue
+  rovo:mcp:
+    - key: clearpage-mcp
+      name: Clearpage accessibility
+      tools:
+        - check-page
+        - check-space
+        - fix-page
+        - create-accessibility-issue
   action:
+    - key: check-space
+      name: Check space accessibility
+      function: checkSpace
+      actionVerb: GET
+      description: >
+        Scores every page in a Confluence space for accessibility and returns the
+        totals and the pages that need the most work, worst first.
+      inputs:
+        spaceKey:
+          title: Space key
+          type: string
+          required: false
+          description: The Confluence space key, for example HR. Leave empty for the space the user is in.
+    - key: create-accessibility-issue
+      name: Create accessibility Jira issue
+      function: createIssue
+      actionVerb: CREATE
+      description: >
+        Creates a Jira issue listing a page's accessibility barriers and fixes,
+        assigned to the page owner. Never creates a duplicate for the same page.
+      inputs:
+        page:
+          title: Page link or ID
+          type: string
+          required: true
+          description: The Confluence page URL or numeric page ID.
+        projectKey:
+          title: Jira project key
+          type: string
+          required: true
+          description: The Jira project to create the issue in, for example HR.
     - key: fix-page
       name: Fix page accessibility
       function: fixPage
@@ -151,6 +199,10 @@ modules:
       handler: index.checkPageAction
     - key: fixPage
       handler: index.fixPageAction
+    - key: checkSpace
+      handler: index.checkSpaceAction
+    - key: createIssue
+      handler: index.createIssueAction
     - key: bylinePropsFn
       handler: index.bylineProps
     - key: bylineResolverFn
