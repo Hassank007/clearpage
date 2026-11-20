@@ -14,6 +14,10 @@ Sites → your site → Connected apps → Clearpage).
 
 ## Tools
 
+Tool names appear in clients with a prefix and, for test builds, an environment
+suffix, e.g. `mcp__clearpage__check-page_development` in Claude Code. The
+production build has no suffix.
+
 | Tool | What it does | Changes anything? |
 |---|---|---|
 | `check-page` | Scores one page (0–100) and lists every barrier: rule, WCAG criterion, nearest heading, the text involved, and the fix. | No |
