@@ -5,7 +5,8 @@ Rovo is needed only for steps 4 and 6.
 
 ## 1. Install
 
-1. Open the install link: **`INSTALL_LINK_GOES_HERE`**
+1. Open the **installation link in the Devpost submission** (Testing instructions). It is
+   Atlassian's standard Forge install link for the production version.
 2. Choose your site and install it for **Confluence**.
 3. Optional, for Jira issues: open the same link again and install it for **Jira** on the same site.
 
