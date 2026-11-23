@@ -18,7 +18,7 @@ No setup or keys are needed. Clearpage runs on Atlassian (Forge) and sends no da
 2. In the left sidebar, under **Space apps**, click **Accessibility report**.
 3. Click **Add 2 sample pages to try Clearpage**.
 
-This adds two realistic HR pages full of everyday barriers: "New starter guide" (38/100)
+This adds two made-up HR pages full of everyday barriers: "New starter guide" (38/100)
 and "Benefits FAQ" (58/100). They are created through the API because Confluence's editor
 auto-corrects some barriers, such as typed lists.
 
@@ -48,7 +48,7 @@ with plain-words problems.
 1. Go back to **Accessibility report**.
 2. Pick a Jira project. Clearpage pre-selects the one that matches the space.
 3. Click **Create issue for New starter guide (Clearpage sample)**. A Task is created for the page owner, listing every barrier with its fix and WCAG number. The row now links to the issue.
-4. Reload the report. The page keeps its issue, and Clearpage never creates a duplicate.
+4. Reload the report. The page keeps its issue, so Clearpage skips it next time.
 
 ## 6. MCP tools for outside agents (optional)
 

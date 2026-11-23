@@ -16,14 +16,14 @@ Sites → your site → Connected apps → Clearpage).
 
 Tool names appear in clients with a prefix and, for test builds, an environment
 suffix, e.g. `mcp__clearpage__check-page_development` in Claude Code. The
-production build has no suffix.
+production build should have no suffix (not checked yet).
 
 | Tool | What it does | Changes anything? |
 |---|---|---|
 | `check-page` | Scores one page (0–100) and lists every barrier: rule, WCAG criterion, nearest heading, the text involved, and the fix. | No |
 | `check-space` | Scores every page in a space; returns totals and the 10 pages that need the most work. | No |
 | `fix-page` | Makes one exact fix and saves it as a new page version (undo from Page history). | **Yes**, ask first |
-| `create-accessibility-issue` | Creates a Jira issue for a page, assigned to the page owner, listing barriers and fixes. Never duplicates. | **Yes**, ask first |
+| `create-accessibility-issue` | Creates a Jira issue for a page, assigned to the page owner, listing barriers and fixes. Skips pages that already have a labelled issue. | **Yes**, ask first |
 
 The checks are fixed rules, not AI guesses: the same page always gets the same score.
 

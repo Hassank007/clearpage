@@ -2,11 +2,10 @@
 
 **Accessibility checks and fixes for Confluence pages, inside Confluence, Rovo and Jira.**
 
-Companies keep their policies, HR guides, onboarding and how-tos in Confluence. Most of those
-pages were never checked for accessibility, so blind and low-vision colleagues who use screen
-readers hear "link, click here", "image", or a wall of text with no headings to jump between.
-In the EU (European Accessibility Act) and the US (ADA Title II) this content increasingly has
-to be accessible, but nobody has time to audit hundreds of pages.
+Companies keep their policies, HR guides, onboarding and how-tos in Confluence. When those pages
+have unclear links, missing image descriptions or fake headings, colleagues who use screen readers
+hear "link, click here", "image", or a wall of text with no headings to jump between. Checking
+hundreds of pages by hand takes time most teams do not have.
 
 Clearpage gives every page a score, explains each barrier in plain words, and fixes what it
 safely can with one click, always after the author confirms.
@@ -23,7 +22,7 @@ Built for **Codegeist 2026** (Apps for Business Teams) on Atlassian Forge.
 |---|---|
 | **Under every page title** | A badge such as **Accessibility 58/100** (or **Accessible ✓**). Click it for the report: barriers grouped by section, each with its severity, the fix and the WCAG criterion. One button, **Fix headings, lists and tables**, repairs the page structure without touching the author's words. |
 | **Rovo chat: the Clearpage agent** | "Check this page", "Fix the click here link", "Which pages in this space need the most work?". The agent explains barriers in plain language, suggests specific link text, and edits only after Rovo's own **Confirm** card. |
-| **Space sidebar: Accessibility report** | Every page in the space with its score, worst first. One click creates a **Jira issue** for the page owner listing every barrier and fix, or create issues for all pages under 70. Never creates duplicates. |
+| **Space sidebar: Accessibility report** | Every page in the space with its score, worst first. One click creates a **Jira issue** for the page owner listing every barrier and fix, or create issues for all pages under 70. A label on each issue lets the report skip pages that already have one (it looks at the 200 newest labelled issues you can see). |
 | **Any MCP client** (Claude, Kiro, Rovo Studio…) | A Rovo MCP server with four tools: `check-page`, `check-space`, `fix-page` and `create-accessibility-issue`, plus a [skill guide](skills/clearpage-accessibility/SKILL.md) so outside agents use them safely. |
 
 Every fix is saved as a new page version called "Clearpage accessibility fix", so **Page
@@ -31,7 +30,7 @@ history** can undo it.
 
 ## What it checks
 
-The checks are fixed rules written by a DHS Section 508 Trusted Tester, not AI guesses. The
+The checks are fixed rules, not AI guesses. The
 same page always gets the same score. AI (Rovo) only writes suggestions on top of the
 findings, such as new link text.
 
@@ -68,7 +67,7 @@ Confluence page (ADF JSON)
 
 * **Runs on Atlassian** (Forge): no external servers, no data leaves Atlassian.
 * **Reads and writes as the user** (`asUser`), so Clearpage can only see and change what that
-  person already can. Viewers without edit rights see the score but cannot change the page.
+  person already can. Saving uses the viewer's own edit permission (not separately tested with a view-only account).
 * **No Forge LLM calls**: the AI is Rovo, so there are no extra AI costs.
 * **Fixes never change the author's words** unless the author types or approves the new words.
 
@@ -94,7 +93,7 @@ pages.
 
 ```bash
 npm install
-npm test                  # 30 tests, Node's built-in test runner
+npm test                  # 31 tests, Node's built-in test runner
 forge deploy -e development
 forge install --site <your-site>.atlassian.net --product confluence -e development
 forge install --site <your-site>.atlassian.net --product jira -e development   # optional, for Jira issues
@@ -124,4 +123,12 @@ the MCP tools.
 
 ---
 
-Built by Hassan Ahmed, DHS Section 508 Trusted Tester. Built with Claude Code as a coding assistant.
+**How it was made:** by Hassan Ahmed, DHS Section 508 Trusted Tester, who directed the work. Claude Code
+wrote the code, tests and docs, and drove the browser for testing and the demo recording.
+
+**What is tested:** 31 unit tests cover the checks, the page edits and the report helpers. They do not
+cover saving pages or calling Jira. Tried live on an Atlassian demo site (seeded sample data plus two
+pages made for the demo): the badge, the one-click fix, link-text fixes, the space report, creating a
+single Jira issue, and the two read-only MCP tools from Claude Code (on the development build).
+**Not tried live:** setting image alt text, creating Jira issues in bulk, `fix-page` and
+`create-accessibility-issue` over MCP, and view-only accounts.
