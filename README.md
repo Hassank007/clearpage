@@ -12,7 +12,7 @@ safely can with one click, always after the author confirms.
 
 Built for **Codegeist 2026** (Apps for Business Teams) on Atlassian Forge.
 
-**Demo video (2:21):** https://youtu.be/bKbNQUI3TPw
+**Demo video (2:25):** https://youtu.be/_xSwbE_N9jY
 
 ---
 
